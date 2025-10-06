@@ -73,7 +73,6 @@ Personal introduction with tech stack showcase
 
 ### ⚡ Skills
 Interactive skill cards with scroll-triggered animations
-- Auto-animated on mobile when in viewport
 - Hover effects on desktop
 - Categorized by Frontend, Backend, Tools, etc.
 
@@ -181,18 +180,6 @@ portfolio/
 │   └── Portfolio.tsx
 └── package.json
 ```
-
-## 📊 Performance
-
-<div align="center">
-
-![Lighthouse Score](https://img.shields.io/badge/Lighthouse-100%25-success?style=for-the-badge&logo=lighthouse)
-![Performance](https://img.shields.io/badge/Performance-95+-green?style=for-the-badge)
-![Accessibility](https://img.shields.io/badge/Accessibility-100-green?style=for-the-badge)
-![Best Practices](https://img.shields.io/badge/Best_Practices-100-green?style=for-the-badge)
-![SEO](https://img.shields.io/badge/SEO-100-green?style=for-the-badge)
-
-</div>
 
 ## 🤝 Contributing
 
