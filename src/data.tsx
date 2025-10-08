@@ -136,6 +136,7 @@ export const projectsData: Project[] = [
     ],
     publishedDate: "Aug 13, 2025",
     role: "Full-Stack Developer",
+    status: "in development"
   },
   {
     id: 2,

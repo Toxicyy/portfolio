@@ -20,7 +20,19 @@ export const fadeInLeft: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
+
+export const fadeInLeft2: Variants = {
+  hidden: {
+    opacity: 0,
+    x: -400,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.3, ease: "easeOut" },
   },
 };
 

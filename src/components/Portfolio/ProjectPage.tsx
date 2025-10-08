@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useState, useCallback, useEffect, type FC } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect, type FC, useRef } from "react";
+import { motion, type PanInfo } from "framer-motion";
 import {
   Github,
   ExternalLink,
@@ -30,75 +30,178 @@ interface OptimizedCarouselProps {
 
 const OptimizedCarousel: FC<OptimizedCarouselProps> = React.memo(
   ({ images, currentIndex, onNext, onPrev, onImageClick }) => {
+    const [_direction, setDirection] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragX, setDragX] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Handle drag start - set dragging state
+    const handleDragStart = () => {
+      setIsDragging(true);
+      setDragX(0);
+    };
+
+    // Track drag position
+    const handleDrag = (_event: TouchEvent | MouseEvent, info: PanInfo) => {
+      setDragX(info.offset.x);
+    };
+
+    // Handle drag end - determine if swipe threshold met
+    const handleDragEnd = (_event: TouchEvent | MouseEvent, info: PanInfo) => {
+      setIsDragging(false);
+
+      const swipeThreshold = 50;
+      const velocityThreshold = 500;
+
+      if (
+        Math.abs(info.offset.x) > swipeThreshold ||
+        Math.abs(info.velocity.x) > velocityThreshold
+      ) {
+        if (info.offset.x > 0 || info.velocity.x > 0) {
+          setDirection(1);
+          onPrev();
+        } else {
+          setDirection(-1);
+          onNext();
+        }
+      }
+      setDragX(0);
+    };
+
+    // Calculate image position based on current index and drag offset
+    const getImagePosition = (index: number) => {
+      const position = index - currentIndex;
+
+      if (isDragging) {
+        return position * 100 + dragX / 10;
+      }
+
+      return position * 100;
+    };
+
+    // Calculate opacity for adjacent images
+    const getImageOpacity = (index: number) => {
+      const position = index - currentIndex;
+      const absPosition = Math.abs(position);
+
+      if (absPosition === 0) return 1;
+      if (absPosition === 1) return 0.4;
+      return 0;
+    };
+
+    // Calculate scale for visual depth effect
+    const getImageScale = (index: number) => {
+      const position = index - currentIndex;
+      const absPosition = Math.abs(position);
+
+      if (absPosition === 0) return 1;
+      if (absPosition === 1) return 0.85;
+      return 0.8;
+    };
+
+    // Layer images properly
+    const getImageZIndex = (index: number) => {
+      const position = index - currentIndex;
+      return 100 - Math.abs(position);
+    };
+
     return (
       <div className="relative w-full max-w-6xl mx-auto mb-8">
-        <div className="relative bg-gray-800/30 rounded-2xl overflow-hidden backdrop-blur-sm border border-purple-500/20">
-          <div className="relative flex items-center justify-center min-h-[400px] max-h-[70vh]">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.img
-                key={currentIndex}
-                src={images[currentIndex]}
-                alt={`Project screenshot ${currentIndex + 1}`}
-                className="max-w-full max-h-full w-auto h-auto object-contain"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeInOut",
-                  layout: { duration: 0.3 },
-                }}
-                loading="lazy"
-                style={{
-                  maxHeight: "70vh",
-                  objectFit: "contain",
-                }}
-              />
-            </AnimatePresence>
+        <div
+          ref={containerRef}
+          className="relative bg-gray-800/30 rounded-2xl overflow-hidden backdrop-blur-sm border border-purple-500/20"
+        >
+          {/* Main carousel container - responsive height */}
+          <div className="relative flex items-center justify-center min-h-[50vh] md:min-h-[400px] md:max-h-[70vh] overflow-hidden touch-pan-y">
+            {/* Image stack container - draggable */}
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.1}
+              onDragStart={handleDragStart}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+            >
+              {images.map((image, index) => (
+                <motion.div
+                  key={index}
+                  className="absolute inset-0 flex items-center justify-center p-2 md:p-4 pointer-events-none"
+                  style={{
+                    x: `${getImagePosition(index)}%`,
+                    zIndex: getImageZIndex(index),
+                  }}
+                  animate={{
+                    x: `${getImagePosition(index)}%`,
+                    opacity: getImageOpacity(index),
+                    scale: getImageScale(index),
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                    duration: 0.3,
+                  }}
+                >
+                  <img
+                    src={image}
+                    alt={`Project screenshot ${index + 1}`}
+                    className="max-w-full max-h-full w-auto h-auto object-contain select-none"
+                    loading="lazy"
+                    draggable={false}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
 
-            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md rounded-lg px-3 py-1">
+            {/* Counter indicator */}
+            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md rounded-lg px-3 py-1 z-[150] pointer-events-none">
               <span className="text-white text-sm">
                 {currentIndex + 1} / {images.length}
               </span>
             </div>
+
+            {/* Navigation buttons - desktop only, high z-index */}
+            {images.length > 1 && (
+              <>
+                <motion.button
+                  className="hidden md:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-[150] p-3 bg-black/80 backdrop-blur-md border border-purple-500/30 hover:bg-purple-500/20 rounded-xl transition-colors duration-200 items-center justify-center pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDirection(1);
+                    onPrev();
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ChevronLeft className="h-5 w-5 text-white" />
+                </motion.button>
+
+                <motion.button
+                  className="hidden md:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-[150] p-3 bg-black/80 backdrop-blur-md border border-purple-500/30 hover:bg-purple-500/20 rounded-xl transition-colors duration-200 items-center justify-center pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDirection(-1);
+                    onNext();
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ChevronRight className="h-5 w-5 text-white" />
+                </motion.button>
+              </>
+            )}
           </div>
-
-          {images.length > 1 && (
-            <>
-              <motion.button
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 p-3 bg-black/60 backdrop-blur-md border border-purple-500/30 hover:bg-purple-500/20 rounded-xl transition-colors duration-200"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPrev();
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ChevronLeft className="h-5 w-5 text-white" />
-              </motion.button>
-
-              <motion.button
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 p-3 bg-black/60 backdrop-blur-md border border-purple-500/30 hover:bg-purple-500/20 rounded-xl transition-colors duration-200"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onNext();
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ChevronRight className="h-5 w-5 text-white" />
-              </motion.button>
-            </>
-          )}
         </div>
 
+        {/* Thumbnail navigation */}
         {images.length > 1 && (
           <div className="relative group mt-4">
-            {/* Gradient overlays for scroll indication */}
+            {/* Gradient overlays */}
             <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-gray-900 to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-gray-900 to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            {/* Scrollable container with custom scrollbar */}
+
+            {/* Scrollable thumbnails */}
             <div className="flex gap-3 overflow-x-auto pb-3 px-2 scroll-smooth custom-scrollbar-thin">
               {images.map((image, index) => (
                 <motion.button
@@ -120,30 +223,37 @@ const OptimizedCarousel: FC<OptimizedCarouselProps> = React.memo(
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20"
                       layoutId="activeThumb"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
                     />
                   )}
-                  
-                  {/* Image */}
+
                   <img
                     src={image}
                     alt={`Thumbnail ${index + 1}`}
                     className={`w-full h-full object-cover transition-all duration-300 ${
-                      index === currentIndex ? "brightness-100" : "brightness-75 hover:brightness-90"
+                      index === currentIndex
+                        ? "brightness-100"
+                        : "brightness-75 hover:brightness-90"
                     }`}
                     loading="lazy"
                   />
-                  
-                  {/* Index number overlay */}
-                  <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                    index === currentIndex 
-                      ? "bg-purple-500 text-white" 
-                      : "bg-gray-800/80 text-gray-400"
-                  }`}>
+
+                  {/* Index number */}
+                  <div
+                    className={`absolute bottom-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                      index === currentIndex
+                        ? "bg-purple-500 text-white"
+                        : "bg-gray-800/80 text-gray-400"
+                    }`}
+                  >
                     {index + 1}
                   </div>
-                  
-                  {/* Hover glow effect */}
+
+                  {/* Hover effect */}
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-t from-purple-500/0 via-purple-500/0 to-transparent opacity-0 group-hover:opacity-100"
                     whileHover={{ opacity: 0.3 }}
@@ -152,8 +262,8 @@ const OptimizedCarousel: FC<OptimizedCarouselProps> = React.memo(
                 </motion.button>
               ))}
             </div>
-            
-            {/* Scroll hint text */}
+
+            {/* Scroll hint */}
             <motion.div
               className="text-center text-xs text-gray-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               initial={{ opacity: 0 }}
@@ -166,6 +276,7 @@ const OptimizedCarousel: FC<OptimizedCarouselProps> = React.memo(
           </div>
         )}
 
+        {/* Mobile dots indicator */}
         {images.length > 1 && (
           <div className="flex justify-center mt-4 gap-2 md:hidden">
             {images.map((_, index) => (
@@ -227,6 +338,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
     setCurrentImageIndex(0);
   }, [project]);
 
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!project) return;
@@ -251,6 +363,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [project, nextImage, prevImage, onBack]);
 
+  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -265,6 +378,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Sticky header */}
       <div className="sticky top-0 z-30 bg-gray-900/95 backdrop-blur-xl border-b border-purple-500/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <motion.button
@@ -291,6 +405,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Project header */}
         <motion.div
           className="text-center mb-12"
           initial={{ y: 50, opacity: 0 }}
@@ -302,7 +417,9 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
               {project.title}
             </span>
           </h1>
-          <p className="text-gray-400 text-lg mb-4">{project.shortDescription}</p>
+          <p className="text-gray-400 text-lg mb-4">
+            {project.shortDescription}
+          </p>
           <div className="flex items-center justify-center gap-4 text-sm text-purple-400">
             <span>{project.role}</span>
             <span>•</span>
@@ -310,6 +427,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
           </div>
         </motion.div>
 
+        {/* Carousel */}
         <motion.div
           className="mb-12"
           initial={{ y: 50, opacity: 0 }}
@@ -325,6 +443,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
           />
         </motion.div>
 
+        {/* Project details grid */}
         <motion.div
           className="grid lg:grid-cols-2 gap-8"
           initial={{ y: 50, opacity: 0 }}
@@ -336,13 +455,22 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
               <div className="w-2 h-2 bg-purple-500 rounded-full" />
               Project Overview
             </h3>
-            <p className="text-gray-300 leading-relaxed mb-6">{project.fullDescription}</p>
+            <p className="text-gray-300 leading-relaxed mb-6">
+              {project.fullDescription}
+            </p>
 
             <div className="space-y-4">
               <div>
-                <h4 className="text-lg font-semibold text-white mb-2">Key Features</h4>
+                <h4 className="text-lg font-semibold text-white mb-2">
+                  Key Features
+                </h4>
                 <ul className="text-gray-300 space-y-2">
-                  {["Real-time data synchronization", "Responsive design for all devices", "Advanced security implementation", "Scalable architecture"].map((feature, idx) => (
+                  {[
+                    "Real-time data synchronization",
+                    "Responsive design for all devices",
+                    "Advanced security implementation",
+                    "Scalable architecture",
+                  ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
                       <span>{feature}</span>
@@ -360,12 +488,28 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
             </h3>
             <div className="flex flex-wrap gap-2 mb-8">
               {project.technologies.map((tech, idx) => (
-                <Badge key={idx} variant="gradient">{tech}</Badge>
+                <Badge key={idx} variant="gradient">
+                  {tech}
+                </Badge>
               ))}
             </div>
 
+            {/* Project Status Badge */}
+            {project.status === "in development" && (
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 backdrop-blur-sm">
+                  <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                  <span className="text-amber-300 font-medium text-sm">
+                    In Development
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-500/20">
-              <h4 className="text-lg font-semibold text-white mb-3">Project Links</h4>
+              <h4 className="text-lg font-semibold text-white mb-3">
+                Project Links
+              </h4>
               <div className="space-y-3">
                 <a
                   href={project.githubUrl}
@@ -390,6 +534,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
           </Card>
         </motion.div>
 
+        {/* CTA section */}
         <motion.div
           className="mt-12 text-center"
           initial={{ y: 50, opacity: 0 }}
@@ -397,8 +542,12 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
           transition={{ delay: 0.5 }}
         >
           <Card className="p-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10">
-            <h3 className="text-2xl font-bold text-white mb-4">Interested in working together?</h3>
-            <p className="text-gray-300 mb-6">Let's discuss how I can help bring your ideas to life</p>
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Interested in working together?
+            </h3>
+            <p className="text-gray-300 mb-6">
+              Let's discuss how I can help bring your ideas to life
+            </p>
             <div className="flex gap-4 justify-center">
               <Button onClick={onBack}>
                 <Home className="h-4 w-4 mr-2" />

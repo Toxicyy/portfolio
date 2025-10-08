@@ -30,6 +30,7 @@ import {
   fadeInRight,
   fadeInUp,
   scaleIn,
+  fadeInLeft2,
 } from "./animations";
 
 type ToastType = "success" | "error" | "loading";
@@ -169,6 +170,13 @@ const ContactSection: FC = React.memo(() => {
     },
     []
   );
+
+    const getScreenWidth = () => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth;
+    }
+    return 0;
+  };
 
   const validateForm = useCallback(() => {
     const errors: string[] = [];
@@ -317,7 +325,7 @@ const ContactSection: FC = React.memo(() => {
                   key={index}
                   onClick={() => handleContactClick(contact.href)}
                   className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-500 group w-full text-left"
-                  variants={fadeInLeft}
+                  variants={getScreenWidth() > 1024 ? fadeInLeft :  fadeInLeft2}
                   whileHover={{
                     scale: 1.02,
                     x: 10,

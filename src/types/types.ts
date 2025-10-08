@@ -12,6 +12,7 @@ export interface Project {
   publishedDate: string;
   role: string;
   badgeColor?: string;
+  status?: string;
 }
 
 export interface Skill {
