@@ -48,11 +48,11 @@ const SkillsSection: FC<SkillsSectionProps> = React.memo(
             </div>
           </ScrollReveal>
 
-          {/* Skill Filter */}
+          {/* Skill Filter - Responsive with horizontal scroll */}
           <ScrollReveal>
-            <div className="flex justify-center mb-12">
+            <div className="flex justify-center mb-12 overflow-x-auto pb-2 px-2 -mx-2 scrollbar-hide">
               <motion.div
-                className="flex gap-2 bg-black/20 backdrop-blur-md rounded-full p-2 border border-purple-500/20"
+                className="flex gap-2 bg-black/20 backdrop-blur-md rounded-full p-2 border border-purple-500/20 min-w-min mx-auto"
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
@@ -67,7 +67,7 @@ const SkillsSection: FC<SkillsSectionProps> = React.memo(
                   >
                     <Button
                       variant={skillFilter === category ? "primary" : "ghost"}
-                      className={`rounded-full px-6 py-2 transition-all duration-300 ${
+                      className={`rounded-full px-3 sm:px-4 md:px-6 py-2 transition-all duration-300 whitespace-nowrap text-xs sm:text-sm md:text-base ${
                         skillFilter === category
                           ? "bg-gradient-to-r from-purple-600 to-pink-600"
                           : "text-gray-300 hover:text-white hover:bg-purple-500/20"
