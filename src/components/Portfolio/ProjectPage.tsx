@@ -466,9 +466,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
                 </h4>
                 <ul className="text-gray-300 space-y-2">
                   {[
-                    "Real-time data synchronization",
                     "Responsive design for all devices",
-                    "Advanced security implementation",
                     "Scalable architecture",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">

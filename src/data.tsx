@@ -114,7 +114,7 @@ export const projectsData: Project[] = [
       "HLS Streaming",
       "JWT Auth",
     ],
-    githubUrl: "https://github.com/Toxicyy/Soundify",
+    githubUrl: "https://github.com/ivanvysocinas/Soundify",
     liveUrl: "https://soundify-production-e79b.up.railway.app/",
     images: [
       thumbnail,
@@ -155,7 +155,7 @@ export const projectsData: Project[] = [
       "Context API",
       "Jest",
     ],
-    githubUrl: "https://github.com/Toxicyy/Snap-URL-Admin",
+    githubUrl: "https://github.com/ivanvysocinas/Snap-URL-Admin",
     liveUrl: "https://app.snapurl.uk",
     images: [
       thumbnail2,
@@ -193,7 +193,7 @@ export const projectsData: Project[] = [
       "Ant Design",
       "React 18",
     ],
-    githubUrl: "https://github.com/Toxicyy/AirPods-landing",
+    githubUrl: "https://github.com/ivanvysocinas/AirPods-landing",
     liveUrl: "https://airpods-landing-production.up.railway.app/",
     images: [
       mainAir,
@@ -228,7 +228,7 @@ export const projectsData: Project[] = [
       "Swagger",
       "Docker",
     ],
-    githubUrl: "https://github.com/Toxicyy/Snap-URL-API",
+    githubUrl: "https://github.com/ivanvysocinas/Snap-URL-API",
     liveUrl: "https://snapurl.uk/api-docs",
     images: [
       thumbnail3,

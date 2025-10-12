@@ -45,14 +45,14 @@ const contactInfo: ContactInfo[] = [
   {
     icon: Mail,
     title: "Email",
-    value: "firstpicktinker@gmail.com",
-    href: "mailto:firstpicktinker@gmail.com",
+    value: "ivanvysocinas@gmail.com",
+    href: "mailto:ivanvysocinas@gmail.com",
   },
   {
     icon: Github,
     title: "GitHub",
-    value: "@Toxicyy",
-    href: "https://github.com/Toxicyy",
+    value: "@ivanvysocinas",
+    href: "https://github.com/ivanvysocinas",
   },
   {
     icon: Send,
@@ -60,11 +60,20 @@ const contactInfo: ContactInfo[] = [
     value: "@Bugzers",
     href: "https://t.me/Bugzers",
   },
+  {
+    icon: Linkedin,
+    title: "Linkedin",
+    value: "Ivan Vysocinas",
+    href: "https://www.linkedin.com/in/ivan-vysocinas-20716b38a/",
+  },
 ];
 
 const socialLinks = [
-  { icon: Linkedin, href: "https://linkedin.com" },
-  { icon: Github, href: "https://github.com/Toxicyy" },
+  {
+    icon: Linkedin,
+    href: "https://www.linkedin.com/in/ivan-vysocinas-20716b38a/",
+  },
+  { icon: Github, href: "https://github.com/ivanvysocinas" },
   { icon: Send, href: "https://t.me/Bugzers" },
 ];
 
@@ -171,7 +180,7 @@ const ContactSection: FC = React.memo(() => {
     []
   );
 
-    const getScreenWidth = () => {
+  const getScreenWidth = () => {
     if (typeof window !== "undefined") {
       return window.innerWidth;
     }
@@ -256,14 +265,6 @@ const ContactSection: FC = React.memo(() => {
     }
   }, [formData, isSubmitting, validateForm, addToast, updateToast]);
 
-  const handleContactClick = useCallback((href: string) => {
-    if (href.startsWith("http")) {
-      window.open(href, "_blank", "noopener noreferrer");
-    } else {
-      window.location.href = href;
-    }
-  }, []);
-
   const handleSocialClick = useCallback((href: string) => {
     window.open(href, "_blank", "noopener noreferrer");
   }, []);
@@ -321,11 +322,19 @@ const ContactSection: FC = React.memo(() => {
 
             <div className="space-y-6">
               {contactInfo.map((contact, index) => (
-                <motion.button
+                <motion.a
                   key={index}
-                  onClick={() => handleContactClick(contact.href)}
+                  href={contact.href}
+                  target={
+                    contact.href.startsWith("http") ? "_blank" : undefined
+                  }
+                  rel={
+                    contact.href.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
                   className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-500 group w-full text-left"
-                  variants={getScreenWidth() > 1024 ? fadeInLeft :  fadeInLeft2}
+                  variants={getScreenWidth() > 1024 ? fadeInLeft : fadeInLeft2}
                   whileHover={{
                     scale: 1.02,
                     x: 10,
@@ -352,7 +361,7 @@ const ContactSection: FC = React.memo(() => {
                       {contact.value}
                     </p>
                   </div>
-                </motion.button>
+                </motion.a>
               ))}
             </div>
 
@@ -413,10 +422,6 @@ const ContactSection: FC = React.memo(() => {
                     </CardTitle>
                     <CardDescription className="text-gray-400">
                       Let's discuss your next project
-                      <br />
-                      <span className="text-xs text-purple-400">
-                        Press Ctrl+Enter to send quickly
-                      </span>
                     </CardDescription>
                   </CardHeader>
                 </motion.div>
@@ -442,9 +447,9 @@ const ContactSection: FC = React.memo(() => {
                             type={field.type}
                             placeholder={field.placeholder}
                             value={formData[field.key]}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleInputChange(field.key, e.target.value)
-                            }
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => handleInputChange(field.key, e.target.value)}
                             className="hover:border-purple-400 transition-all duration-300 focus:border-purple-500"
                             disabled={isSubmitting}
                           />
@@ -466,9 +471,9 @@ const ContactSection: FC = React.memo(() => {
                         <Textarea
                           placeholder="Hello, I'd like to talk about..."
                           value={formData.message}
-                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                            handleInputChange("message", e.target.value)
-                          }
+                          onChange={(
+                            e: React.ChangeEvent<HTMLTextAreaElement>
+                          ) => handleInputChange("message", e.target.value)}
                           rows={6}
                           maxLength={1000}
                           className="hover:border-purple-400 transition-all duration-300 focus:border-purple-500"

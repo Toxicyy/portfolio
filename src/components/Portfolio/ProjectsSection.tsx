@@ -56,7 +56,7 @@ const ProjectsSection: FC<ProjectsSectionProps> = React.memo(
     );
 
     const handleViewAllClick = useCallback(() => {
-      window.open("https://github.com/Toxicyy", "_blank");
+      window.open("https://github.com/ivanvysocinas", "_blank");
     }, []);
 
     const nextSlide = useCallback(() => {
@@ -210,7 +210,7 @@ const ProjectsSection: FC<ProjectsSectionProps> = React.memo(
                           <Badge
                             variant={
                               project.badgeColor === "black"
-                                ? "black"
+                                ? "secondary"
                                 : "gradient"
                             }
                           >
