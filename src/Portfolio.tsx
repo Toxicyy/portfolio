@@ -17,7 +17,6 @@ import { projectsData } from "./data";
 
 const Portfolio: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
-  const [skillFilter, setSkillFilter] = useState("All");
 
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -31,10 +30,6 @@ const Portfolio: React.FC = () => {
   const handleNavigateHome = useCallback(() => {
     setCurrentPage('home');
     window.scrollTo(0, 0);
-  }, []);
-
-  const handleSkillFilterChange = useCallback((filter: string) => {
-    setSkillFilter(filter);
   }, []);
 
   const currentProject = typeof currentPage === 'number'
@@ -52,10 +47,7 @@ const Portfolio: React.FC = () => {
           <div key="home">
             <HeroSection y={y} opacity={opacity} />
             <AboutSection />
-            <SkillsSection
-              skillFilter={skillFilter}
-              onSkillFilterChange={handleSkillFilterChange}
-            />
+            <SkillsSection/>
             <ProjectsSection
               projects={projectsData}
               onProjectSelect={handleProjectSelect}

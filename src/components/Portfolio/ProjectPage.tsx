@@ -398,7 +398,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
             </Button>
             <Button onClick={handleOpenDemo}>
               <ExternalLink className="h-4 w-4 mr-2" />
-              Live Demo
+              {project.isApi ? "API docs" : "Live Demo"}
             </Button>
           </div>
         </div>
@@ -525,7 +525,7 @@ const ProjectPage: FC<ProjectPageProps> = ({ project, onBack }) => {
                   className="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
                 >
                   <ExternalLink className="h-5 w-5" />
-                  Visit Live Site
+                  {project.isApi ? "View API docs" : "Visit Live Site"}
                 </a>
               </div>
             </div>

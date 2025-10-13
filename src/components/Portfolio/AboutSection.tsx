@@ -40,6 +40,24 @@ const AboutSection: FC = React.memo(() => {
     element?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  const downloadCV = useCallback(() => {
+    const language = 'en';
+    
+    const cvPath = language === 'en' 
+    ? '/portfolio/cv/Ivan_Vysocinas_CV_EN.pdf'
+    : '/portfolio/cv/Ivan_Vysocinas_CV_RU.pdf';
+    
+    const link = document.createElement('a');
+    link.href = cvPath;
+    link.download = language === 'en' 
+      ? 'Ivan_Vysocinas_CV_EN.pdf'
+      : 'Ivan_Vysocinas_CV_RU.pdf';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, []);
+
   return (
     <section id="about" className="relative z-10 py-20 px-6">
       <div className="max-w-6xl mx-auto">
@@ -105,7 +123,7 @@ const AboutSection: FC = React.memo(() => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={downloadCV}>
                     <Download className="h-4 w-4 mr-2" />
                     Download CV
                   </Button>

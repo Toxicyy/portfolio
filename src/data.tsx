@@ -245,6 +245,7 @@ export const projectsData: Project[] = [
     ],
     publishedDate: "Sep 12, 2025",
     role: "Backend Developer",
+    isApi: true,
   },
 ];
 

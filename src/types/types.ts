@@ -13,6 +13,7 @@ export interface Project {
   role: string;
   badgeColor?: string;
   status?: string;
+  isApi?: boolean;
 }
 
 export interface Skill {
